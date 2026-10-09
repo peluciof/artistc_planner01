@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pitch Deck, Curva S (Planejado x Realizado) & Dashboard</title>
+    <style>
+        :root {
+            --primary: #121212;
+            --accent: #1db954; 
+            --plan-color: #3498db;
+            --real-color: #e67e22;
+            --mkt-color: #9b59b6;
+            --bg-card: #1e1e1e;
+            --text-main: #f0f0f0;
+            --text-muted: #a0a0a0;
+            --border: #333333;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body { background-color: var(--primary); color: var(--text-main); padding: 20px; line-height: 1.6; }
+
+        header { text-align: center; margin-bottom: 40px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+        header h1 { font-size: 2.2rem; color: var(--accent); margin-bottom: 10px; }
+        header p { color: var(--text-muted); font-size: 1.1rem; }
+
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        .section-title { font-size: 1.5rem; margin: 40px 0 20px 0; border-left: 4px solid var(--accent); padding-left: 10px; color: var(--text-main); }
+
+        /* SLIDES */
+        .slides-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 40px; }
+        .slide-card { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 14px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.4); transition: transform 0.3s ease, border-color 0.3s ease; }
+        .slide-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+        .slide-number { position: absolute; top: 10px; right: 10px; font-size: 0.65rem; color: var(--accent); font-weight: bold; background: rgba(29, 185, 84, 0.1); padding: 2px 6px; border-radius: 4px; }
+        .slide-card h3 { font-size: 0.9rem; margin-bottom: 10px; color: #fff; padding-right: 40px; line-height: 1.3; }
+        .slide-card ul { list-style-type: disc; padding-left: 16px; color: var(--text-muted); font-size: 0.72rem; }
+        .slide-card li { margin-bottom: 5px; line-height: 1.35; }
+        .slide-card li strong { color: #ddd; }
+        @media (min-width: 1100px) { .slides-row { gap: 18px; } .slide-card { padding: 18px 16px; } .slide-card h3 { font-size: 0.95rem; } .slide-card ul { font-size: 0.75rem; } }
+        @media (max-width: 900px) { .slides-row { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 520px) { .slides-row { grid-template-columns: 1fr; } }
+
+        /* DASHBOARD */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .metric-card { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+        .metric-card h4 { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase; display: flex; justify-content: space-between; }
+        .metric-card .value { font-size: 1.5rem; font-weight: bold; color: var(--accent); margin-bottom: 12px; }
+        .progress-bar-container { width: 100%; background-color: #333; border-radius: 6px; height: 10px; overflow: hidden; margin-top: 8px; }
+        .progress-bar { height: 100%; background-color: var(--accent); border-radius: 6px; transition: width 0.6s ease; }
+
+        /* GRÁFICO */
+        .s-curve-box { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 25px; margin-bottom: 30px; }
+        .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        .chart-legend { display: flex; gap: 20px; font-size: 0.85rem; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-color { width: 12px; height: 12px; border-radius: 3px; }
+
+        .s-chart-combo { position: relative; height: 320px; margin: 20px 0 10px 0; padding: 0 10px; border-bottom: 2px solid var(--border); border-left: 2px solid var(--border); }
+
+        /* Barras PRIMEIRO (atrás) */
+        .bars-container { position: absolute; bottom: 0; left: 10px; right: 10px; height: 260px; display: flex; justify-content: space-around; align-items: flex-end; pointer-events: none; z-index: 1; }
+        .bar-mkt-wrapper { width: 14%; max-width: 60px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+        .bar-mkt-label { font-size: 0.65rem; color: #fff; font-weight: bold; margin-bottom: 4px; text-align: center; white-space: nowrap; opacity: 0; transition: opacity 0.4s; }
+        .bar-mkt-label.visible { opacity: 1; }
+        .bar-mkt { width: 100%; background-color: var(--mkt-color); border-radius: 4px 4px 0 0; transition: height 0.6s ease; min-height: 0; opacity: 0.5; }
+
+        /* SVG DEPOIS (na frente) */
+        .chart-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: block; overflow: visible; z-index: 3; }
+
+        .axis-x { display: flex; justify-content: space-around; margin-top: 10px; font-size: 0.8rem; color: var(--text-muted); text-align: center; }
+        .x-label { flex: 1; }
+        .x-label.active { color: var(--accent); font-weight: bold; }
+
+        .value-label { font-size: 0.7rem; font-weight: bold; text-anchor: middle; }
+        .value-label.plan { fill: var(--plan-color); }
+        .value-label.real { fill: var(--real-color); }
+
+        /* SEM EFEITO DE BRILHO */
+        .dot-plan { fill: var(--plan-color); stroke: var(--primary); stroke-width: 2; }
+        .dot-real { fill: var(--real-color); stroke: var(--primary); stroke-width: 2; }
+        .dot-plan.highlight { r: 8; stroke: #fff; stroke-width: 3; }
+        .dot-real.highlight { r: 8; stroke: #fff; stroke-width: 3; }
+
+        .line-plan { stroke: var(--plan-color); stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; opacity: 0.5; }
+        .line-real { stroke: var(--real-color); stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; opacity: 0.5; }
+        .line-plan.active, .line-real.active { opacity: 1; }
+
+        /* SIMULADOR */
+        .sim-controls { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 30px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; }
+        .sim-controls p { color: var(--text-muted); font-size: 0.95rem; }
+        .btn-sim { background-color: var(--accent); color: #121212; border: none; padding: 10px 20px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: opacity 0.2s; }
+        .btn-sim:hover { opacity: 0.85; }
+        .btn-reset { background-color: transparent; color: var(--text-muted); border: 1px solid var(--border); padding: 10px 20px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: all 0.2s; margin-left: 10px; }
+        .btn-reset:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* TABELA */
+        .table-container { background-color: var(--bg-card); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 40px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 15px 20px; border-bottom: 1px solid var(--border); }
+        th { background-color: rgba(255, 255, 255, 0.05); color: var(--accent); font-size: 0.95rem; text-transform: uppercase; }
+        td { color: var(--text-muted); font-size: 0.95rem; }
+        td strong { color: var(--text-main); }
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+        .badge-pending { background: rgba(255, 193, 7, 0.15); color: #ffc107; }
+        .badge-active { background: rgba(29, 185, 84, 0.15); color: #1db954; }
+        .badge-warn { background: rgba(230, 126, 34, 0.15); color: #e67e22; }
+
+        footer { text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.85rem; border-top: 1px solid var(--border); }
+
+        @media (max-width: 600px) { .bar-mkt-wrapper { width: 18%; } .value-label { font-size: 0.6rem; } }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Gestão Artística & Curva S de Captação</h1>
+            <p>Planejado x Realizado (Forecast com desvios leves) & Aporte de Marketing a partir da 2ª Etapa</p>
+        </header>
+
+        <!-- SLIDES -->
+        <h2 class="section-title">Estrutura do Pitch Deck (Apresentação & Posicionamento)</h2>
+        <div class="slides-row">
+            <div class="slide-card">
+                <span class="slide-number">01</span>
+                <h3>Manifesto & MVP Enxuto</h3>
+                <ul>
+                    <li><strong>Proposta:</strong> Início focado com R$ 5 mil para validação de estilo.</li>
+                    <li><strong>Protagonismo:</strong> Cantora assume curadoria dos testes em estúdio.</li>
+                    <li><strong>Foco:</strong> Base orgânica e credibilidade.</li>
+                </ul>
+            </div>
+            <div class="slide-card">
+                <span class="slide-number">02</span>
+                <h3>Marketing de Bastidores</h3>
+                <ul>
+                    <li><strong>Início (Etapa 2):</strong> Aporte em vlogs e captação diária.</li>
+                    <li><strong>Transparência:</strong> Jornada testando equipamentos e compondo.</li>
+                    <li><strong>Engajamento:</strong> Comunidade antes do 1º lançamento.</li>
+                </ul>
+            </div>
+            <div class="slide-card">
+                <span class="slide-number">03</span>
+                <h3>Governança & Produção</h3>
+                <ul>
+                    <li><strong>Direção:</strong> Experiência em estúdio, palco e gestão.</li>
+                    <li><strong>Mitigação:</strong> Controle via Curva S (Planejado x Real).</li>
+                    <li><strong>Parcerias:</strong> Engenheiros e estrategistas integrados.</li>
+                </ul>
+            </div>
+            <div class="slide-card">
+                <span class="slide-number">04</span>
+                <h3>Curva S de Captação</h3>
+                <ul>
+                    <li><strong>Fase 1:</strong> MVP Inicial (R$ 5k).</li>
+                    <li><strong>Fase 2:</strong> PNAB (R$ 25k) + Marketing.</li>
+                    <li><strong>Fase 3 & 4:</strong> Rouanet e Privado (R$ 120k–350k+).</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- DASHBOARD -->
+        <h2 class="section-title">Dashboard Dinâmico</h2>
+        <div class="dashboard-grid">
+            <div class="metric-card">
+                <h4><span>Etapa Atual</span> <span id="fase-tag" style="color:var(--accent);">Etapa 1</span></h4>
+                <div class="value" id="fase-nome" style="font-size: 1.1rem;">Etapa 1: MVP Inicial (R$ 5k)</div>
+                <div style="font-size:0.85rem; color:var(--text-muted);">Progresso Geral:</div>
+                <div class="progress-bar-container">
+                    <div id="bar-fase" class="progress-bar" style="width: 25%;"></div>
+                </div>
+            </div>
+            <div class="metric-card">
+                <h4><span>Orçamento Planejado vs Real</span></h4>
+                <div class="value" id="val-comparativo">R$ 5k / R$ 5k</div>
+                <div style="font-size:0.85rem; color:var(--text-muted);">Desvio (Forecast): <span id="val-desvio" style="color:var(--accent);">Em dia</span></div>
+                <div class="progress-bar-container">
+                    <div id="bar-cap" class="progress-bar" style="width: 15%;"></div>
+                </div>
+            </div>
+            <div class="metric-card">
+                <h4><span>Aporte de Marketing</span> <span id="mkt-status">Inativo</span></h4>
+                <div class="value" id="val-mkt" style="font-size: 1.1rem;">R$ 0 (Inicia na Etapa 2)</div>
+                <div style="font-size:0.85rem; color:var(--text-muted);">Vlogs & Backstage Ativos</div>
+                <div class="progress-bar-container">
+                    <div id="bar-mkt" class="progress-bar" style="width: 0%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GRÁFICO -->
+        <div class="s-curve-box">
+            <div class="chart-header">
+                <h4 style="color: var(--text-main); font-size: 1.1rem;">Curva S de Captação (Linhas) & Aporte de Marketing (Barras)</h4>
+                <div class="chart-legend">
+                    <div class="legend-item"><div class="legend-color" style="background:var(--plan-color);"></div> Planejado Acum.</div>
+                    <div class="legend-item"><div class="legend-color" style="background:var(--real-color);"></div> Realizado Acum.</div>
+                    <div class="legend-item"><div class="legend-color" style="background:var(--mkt-color);"></div> Aporte Mkt (2ª etapa+)</div>
+                </div>
+            </div>
+
+            <div class="s-chart-combo">
+                <!-- BARRAS ROXAS PRIMEIRO (atrás) -->
+                <div class="bars-container" id="barrasMkt">
+                    <div class="bar-mkt-wrapper">
+                        <div class="bar-mkt-label" id="label-mkt-1">0k</div>
+                        <div class="bar-mkt" id="bar-mkt-1" style="height: 0%;"></div>
+                    </div>
+                    <div class="bar-mkt-wrapper">
+                        <div class="bar-mkt-label" id="label-mkt-2">8k</div>
+                        <div class="bar-mkt" id="bar-mkt-2" style="height: 0%;"></div>
+                    </div>
+                    <div class="bar-mkt-wrapper">
+                        <div class="bar-mkt-label" id="label-mkt-3">25k</div>
+                        <div class="bar-mkt" id="bar-mkt-3" style="height: 0%;"></div>
+                    </div>
+                    <div class="bar-mkt-wrapper">
+                        <div class="bar-mkt-label" id="label-mkt-4">60k</div>
+                        <div class="bar-mkt" id="bar-mkt-4" style="height: 0%;"></div>
+                    </div>
+                </div>
+
+                <!-- SVG DAS LINHAS DEPOIS (na frente) -->
+                <svg class="chart-svg" viewBox="0 0 800 260" preserveAspectRatio="none" id="svgCurvaS">
+                    <g stroke="#333" stroke-width="1" stroke-dasharray="4 4">
+                        <line x1="0" y1="0" x2="800" y2="0" />
+                        <line x1="0" y1="65" x2="800" y2="65" />
+                        <line x1="0" y1="130" x2="800" y2="130" />
+                        <line x1="0" y1="195" x2="800" y2="195" />
+                        <line x1="0" y1="260" x2="800" y2="260" />
+                    </g>
+                    <g id="linhasDinamicas"></g>
+                </svg>
+            </div>
+
+            <div class="axis-x" id="eixoX">
+                <div class="x-label" data-etapa="1">Etapa 1<br><span style="font-size:0.7rem;">(MVP Lab)</span></div>
+                <div class="x-label" data-etapa="2">Etapa 2<br><span style="font-size:0.7rem;">(Editais/Mkt)</span></div>
+                <div class="x-label" data-etapa="3">Etapa 3<br><span style="font-size:0.7rem;">(Rouanet/Escala)</span></div>
+                <div class="x-label" data-etapa="4">Etapa 4<br><span style="font-size:0.7rem;">(Total/Privado)</span></div>
+            </div>
+        </div>
+
+        <!-- SIMULADOR -->
+        <div class="sim-controls">
+            <div>
+                <strong>Simulador de Etapas (Step-by-Step):</strong>
+                <p>Clique para avançar e ver a <strong>curva sendo construída</strong> + desvios leves + entrada do <strong>Marketing</strong>.</p>
+            </div>
+            <div>
+                <button class="btn-sim" id="btnAvancar">Avançar Próxima Etapa</button>
+                <button class="btn-reset" id="btnReset">Resetar</button>
+            </div>
+        </div>
+
+        <!-- CRONOGRAMA -->
+        <h2 class="section-title">Cronograma Executivo (Início: Novembro de 2026)</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Período</th>
+                        <th>Fase do Projeto</th>
+                        <th>Ações, Captação & Marketing</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr id="row-1" style="background: rgba(29, 185, 84, 0.05);">
+                        <td><strong>Novembro / 2026</strong></td>
+                        <td>Etapa 1: MVP Inicial (R$ 5.000)</td>
+                        <td>Sessões de estúdio enxutas, testes de instrumentos e início da validação sonora. (Marketing interno).</td>
+                        <td><span class="badge badge-active" id="status-1">Em Andamento</span></td>
+                    </tr>
+                    <tr id="row-2">
+                        <td><strong>Dezembro / 2026</strong></td>
+                        <td>Etapa 2: PNAB & Início do Marketing (R$ 25.000)</td>
+                        <td>Inscrições na PNAB/Aldir Blanc + <strong>Início oficial do aporte de marketing</strong> (vlogs, lojas de instrumentos, backstages).</td>
+                        <td><span class="badge badge-pending" id="status-2">Planejado</span></td>
+                    </tr>
+                    <tr id="row-3">
+                        <td><strong>Janeiro / 2027</strong></td>
+                        <td>Etapa 3: Curva S Acelerada (R$ 120.000)</td>
+                        <td>Protocolo de projetos na Lei Rouanet e reuniões comerciais privadas com expansão do marketing digital.</td>
+                        <td><span class="badge badge-pending" id="status-3">Planejado</span></td>
+                    </tr>
+                    <tr id="row-4">
+                        <td><strong>Fevereiro / 2027+</strong></td>
+                        <td>Etapa 4+: Escala Total (R$ 350.000+)</td>
+                        <td>Captação consolidada com patrocinadores privados, gravação oficial do EP e revelação do estilo.</td>
+                        <td><span class="badge badge-pending" id="status-4">Planejado</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <footer>
+            <p>Gerenciamento Artístico Profissional • Desenvolvido para planejamento estratégico de captação e carreira.</p>
+        </footer>
+    </div>
+
+    <script>
+        const dadosEtapas = [
+            { planAcum: [5, 30, 150, 500], realAcum: [5, 28, 145, 520], mktMes: [0, 8, 25, 60], etapasVisiveis: 1 },
+            { planAcum: [5, 30, 150, 500], realAcum: [5, 28, 145, 520], mktMes: [0, 8, 25, 60], etapasVisiveis: 2 },
+            { planAcum: [5, 30, 150, 500], realAcum: [5, 28, 145, 520], mktMes: [0, 8, 25, 60], etapasVisiveis: 3 },
+            { planAcum: [5, 30, 150, 500], realAcum: [5, 28, 145, 520], mktMes: [0, 8, 25, 60], etapasVisiveis: 4 }
+        ];
+
+        const MAX_VALOR = 550;
+        const X_POSITIONS = [0, 266.6, 533.3, 800];
+        let etapaAtual = 1;
+
+        function valorParaY(valor) {
+            return Math.max(0, Math.min(260, 260 - (valor / MAX_VALOR) * 260));
+        }
+
+        function atualizarGraficoLinhas() {
+            const dados = dadosEtapas[etapaAtual - 1];
+            const svgGroup = document.getElementById('linhasDinamicas');
+            if (!svgGroup) return;
+
+            const planAcum = dados.planAcum;
+            const realAcum = dados.realAcum;
+            const etapasVisiveis = dados.etapasVisiveis;
+
+            let planPoints = '';
+            let realPoints = '';
+            for (let i = 0; i < etapasVisiveis; i++) {
+                planPoints += `${X_POSITIONS[i]},${valorParaY(planAcum[i])} `;
+                realPoints += `${X_POSITIONS[i]},${valorParaY(realAcum[i])} `;
+            }
+
+            let svgContent = '';
+
+            if (etapasVisiveis >= 2) {
+                svgContent += `<polyline points="${planPoints}" class="line-plan active" />`;
+                svgContent += `<polyline points="${realPoints}" class="line-real active" />`;
+            }
+
+            // Projeção futura pontilhada
+            if (etapasVisiveis < 4) {
+                let planFuture = '';
+                let realFuture = '';
+                for (let i = etapasVisiveis - 1; i < 4; i++) {
+                    planFuture += `${X_POSITIONS[i]},${valorParaY(planAcum[i])} `;
+                    realFuture += `${X_POSITIONS[i]},${valorParaY(realAcum[i])} `;
+                }
+                svgContent += `<polyline points="${planFuture}" class="line-plan" stroke-dasharray="5 5" opacity="0.25" />`;
+                svgContent += `<polyline points="${realFuture}" class="line-real" stroke-dasharray="5 5" opacity="0.25" />`;
+            }
+
+            for (let i = 0; i < etapasVisiveis; i++) {
+                const x = X_POSITIONS[i];
+                const yPlan = valorParaY(planAcum[i]);
+                const isHighlight = (i === etapasVisiveis - 1);
+                svgContent += `<circle cx="${x}" cy="${yPlan}" r="${isHighlight ? 8 : 6}" class="dot-plan${isHighlight ? ' highlight' : ''}" />`;
+                let labelY = yPlan - 14;
+                if (labelY < 10) labelY = yPlan + 22;
+                svgContent += `<text x="${x}" y="${labelY}" class="value-label plan">${planAcum[i]}k</text>`;
+            }
+
+            for (let i = 0; i < etapasVisiveis; i++) {
+                const x = X_POSITIONS[i];
+                const yReal = valorParaY(realAcum[i]);
+                const isHighlight = (i === etapasVisiveis - 1);
+                svgContent += `<circle cx="${x}" cy="${yReal}" r="${isHighlight ? 8 : 6}" class="dot-real${isHighlight ? ' highlight' : ''}" />`;
+                let labelY = yReal - 14;
+                if (labelY < 10) labelY = yReal + 22;
+                if (Math.abs(yReal - valorParaY(planAcum[i])) < 18) labelY = yReal + 22;
+                svgContent += `<text x="${x}" y="${labelY}" class="value-label real">${realAcum[i]}k</text>`;
+            }
+
+            svgGroup.innerHTML = svgContent;
+
+            document.querySelectorAll('.x-label').forEach((el, idx) => {
+                el.classList.toggle('active', idx === etapasVisiveis - 1);
+            });
+        }
+
+        function atualizarBarrasMarketing() {
+            const dados = dadosEtapas[etapaAtual - 1];
+            const mktMes = dados.mktMes;
+            const etapasVisiveis = dados.etapasVisiveis;
+            const maxMkt = 60;
+
+            for (let i = 0; i < 4; i++) {
+                const bar = document.getElementById(`bar-mkt-${i + 1}`);
+                const label = document.getElementById(`label-mkt-${i + 1}`);
+                if (!bar || !label) continue;
+
+                const valor = (i < etapasVisiveis) ? mktMes[i] : 0;
+                const alturaPercent = (valor / maxMkt) * 100;
+
+                if (valor > 0) {
+                    bar.style.height = Math.max(2, alturaPercent) + '%';
+                    label.textContent = valor + 'k';
+                    label.classList.add('visible');
+                } else {
+                    bar.style.height = '0%';
+                    label.textContent = '0k';
+                    label.classList.remove('visible');
+                }
+            }
+        }
+
+        function atualizarDashboardETabela() {
+            const etapasInfo = [
+                { nome: "Etapa 1: MVP Inicial (R$ 5k)", faseStr: "Etapa 1", comp: "R$ 5k / R$ 5k", desvio: "Em dia (0%)", progFase: "25%", progCap: "15%", mktStatus: "Inativo", mktVal: "R$ 0", progMkt: "0%" },
+                { nome: "Etapa 2: PNAB & Mkt Ativo (R$ 25k)", faseStr: "Etapa 2", comp: "R$ 30k / R$ 28k", desvio: "-7% (Leve atraso)", progFase: "50%", progCap: "35%", mktStatus: "Ativo", mktVal: "R$ 8.000", progMkt: "25%" },
+                { nome: "Etapa 3: Curva S Acelerada (R$ 120k)", faseStr: "Etapa 3", comp: "R$ 150k / R$ 145k", desvio: "-3% (Quase meta)", progFase: "75%", progCap: "70%", mktStatus: "Escala", mktVal: "R$ 33.000", progMkt: "55%" },
+                { nome: "Etapa 4+: Escala Total (R$ 350k+)", faseStr: "Etapa 4", comp: "R$ 500k / R$ 520k", desvio: "+4% (Superação)", progFase: "100%", progCap: "100%", mktStatus: "Consolidado", mktVal: "R$ 93.000", progMkt: "100%" }
+            ];
+
+            const e = etapasInfo[etapaAtual - 1];
+
+            document.getElementById('fase-tag').innerText = e.faseStr;
+            document.getElementById('fase-nome').innerText = e.nome;
+            document.getElementById('val-comparativo').innerText = e.comp;
+            document.getElementById('val-desvio').innerText = e.desvio;
+            document.getElementById('bar-fase').style.width = e.progFase;
+            document.getElementById('bar-cap').style.width = e.progCap;
+            document.getElementById('mkt-status').innerText = e.mktStatus;
+            document.getElementById('val-mkt').innerText = e.mktVal;
+            document.getElementById('bar-mkt').style.width = e.progMkt;
+
+            const desvioEl = document.getElementById('val-desvio');
+            desvioEl.style.color = e.desvio.includes('-') ? '#e67e22' : e.desvio.includes('+') ? '#1db954' : 'var(--accent)';
+
+            for (let i = 1; i <= 4; i++) {
+                const row = document.getElementById('row-' + i);
+                const badge = document.getElementById('status-' + i);
+                row.style.background = 'transparent';
+
+                if (i < etapaAtual) {
+                    badge.className = 'badge badge-active';
+                    badge.innerText = 'Concluído';
+                } else if (i === etapaAtual) {
+                    badge.className = 'badge badge-warn';
+                    badge.innerText = 'Em Andamento';
+                    row.style.background = 'rgba(230, 126, 34, 0.05)';
+                } else {
+                    badge.className = 'badge badge-pending';
+                    badge.innerText = 'Planejado';
+                }
+            }
+        }
+
+        function avancarSimulacao() {
+            etapaAtual = etapaAtual >= 4 ? 1 : etapaAtual + 1;
+            atualizarTudo();
+        }
+
+        function resetSimulacao() {
+            etapaAtual = 1;
+            atualizarTudo();
+        }
+
+        function atualizarTudo() {
+            atualizarGraficoLinhas();
+            atualizarBarrasMarketing();
+            atualizarDashboardETabela();
+        }
+
+        document.getElementById('btnAvancar').addEventListener('click', avancarSimulacao);
+        document.getElementById('btnReset').addEventListener('click', resetSimulacao);
+
+        window.addEventListener('DOMContentLoaded', atualizarTudo);
+    </script>
+
+</body>
+</html>
