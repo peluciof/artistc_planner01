@@ -269,25 +269,25 @@
                 </thead>
                 <tbody>
                     <tr id="row-1" style="background: rgba(29, 185, 84, 0.05);">
-                        <td><strong>Novembro / 2026</strong></td>
+                        <td><strong>À Definir</strong></td>
                         <td>Etapa 1: MVP Inicial (R$ 5.000)</td>
                         <td>Sessões de estúdio enxutas, testes de instrumentos e início da validação sonora. (Marketing interno).</td>
                         <td><span class="badge badge-active" id="status-1">Em Andamento</span></td>
                     </tr>
                     <tr id="row-2">
-                        <td><strong>Dezembro / 2026</strong></td>
+                        <td><strong>À Definir</strong></td>
                         <td>Etapa 2: PNAB & Início do Marketing (R$ 25.000)</td>
                         <td>Inscrições na PNAB/Aldir Blanc + <strong>Início oficial do aporte de marketing</strong> (vlogs, lojas de instrumentos, backstages).</td>
                         <td><span class="badge badge-pending" id="status-2">Planejado</span></td>
                     </tr>
                     <tr id="row-3">
-                        <td><strong>Janeiro / 2027</strong></td>
+                        <td><strong>À Definir</strong></td>
                         <td>Etapa 3: Curva S Acelerada (R$ 120.000)</td>
                         <td>Protocolo de projetos na Lei Rouanet e reuniões comerciais privadas com expansão do marketing digital.</td>
                         <td><span class="badge badge-pending" id="status-3">Planejado</span></td>
                     </tr>
                     <tr id="row-4">
-                        <td><strong>Fevereiro / 2027+</strong></td>
+                        <td><strong>À Definir+</strong></td>
                         <td>Etapa 4+: Escala Total (R$ 350.000+)</td>
                         <td>Captação consolidada com patrocinadores privados, gravação oficial do EP e revelação do estilo.</td>
                         <td><span class="badge badge-pending" id="status-4">Planejado</span></td>
@@ -297,16 +297,16 @@
         </div>
 
         <footer>
-            <p>Gerenciamento Artístico Profissional • Desenvolvido para planejamento estratégico de captação e carreira.</p>
+            <p>Gerenciamento Artístico Profissional • Desenvolvido por Fabio Pelucio.</p>
         </footer>
     </div>
 
     <script>
         const dadosEtapas = [
-            { planAcum: [5, 30, 150, 500], realAcum: [5, 28, 145, 520], mktMes: [0, 8, 25, 60], etapasVisiveis: 1 },
-            { planAcum: [5, 30, 150, 500], realAcum: [5, 28, 145, 520], mktMes: [0, 8, 25, 60], etapasVisiveis: 2 },
-            { planAcum: [5, 30, 150, 500], realAcum: [5, 28, 145, 520], mktMes: [0, 8, 25, 60], etapasVisiveis: 3 },
-            { planAcum: [5, 30, 150, 500], realAcum: [5, 28, 145, 520], mktMes: [0, 8, 25, 60], etapasVisiveis: 4 }
+            { planAcum: [5, 30, 150, 500], realAcum: [5, 25, 140, 515], mktMes: [0, 8, 25, 60], etapasVisiveis: 1 },
+            { planAcum: [5, 30, 150, 500], realAcum: [5, 25, 140, 515], mktMes: [0, 8, 25, 60], etapasVisiveis: 2 },
+            { planAcum: [5, 30, 150, 500], realAcum: [5, 25, 140, 515], mktMes: [0, 8, 25, 60], etapasVisiveis: 3 },
+            { planAcum: [5, 30, 150, 500], realAcum: [5, 25, 140, 515], mktMes: [0, 8, 25, 60], etapasVisiveis: 4 }
         ];
 
         const MAX_VALOR = 550;
@@ -409,9 +409,9 @@
         function atualizarDashboardETabela() {
             const etapasInfo = [
                 { nome: "Etapa 1: MVP Inicial (R$ 5k)", faseStr: "Etapa 1", comp: "R$ 5k / R$ 5k", desvio: "Em dia (0%)", progFase: "25%", progCap: "15%", mktStatus: "Inativo", mktVal: "R$ 0", progMkt: "0%" },
-                { nome: "Etapa 2: PNAB & Mkt Ativo (R$ 25k)", faseStr: "Etapa 2", comp: "R$ 30k / R$ 28k", desvio: "-7% (Leve atraso)", progFase: "50%", progCap: "35%", mktStatus: "Ativo", mktVal: "R$ 8.000", progMkt: "25%" },
-                { nome: "Etapa 3: Curva S Acelerada (R$ 120k)", faseStr: "Etapa 3", comp: "R$ 150k / R$ 145k", desvio: "-3% (Quase meta)", progFase: "75%", progCap: "70%", mktStatus: "Escala", mktVal: "R$ 33.000", progMkt: "55%" },
-                { nome: "Etapa 4+: Escala Total (R$ 350k+)", faseStr: "Etapa 4", comp: "R$ 500k / R$ 520k", desvio: "+4% (Superação)", progFase: "100%", progCap: "100%", mktStatus: "Consolidado", mktVal: "R$ 93.000", progMkt: "100%" }
+                { nome: "Etapa 2: PNAB & Mkt Ativo (R$ 25k)", faseStr: "Etapa 2", comp: "R$ 30k / R$ 25k", desvio: "-17% (Atraso)", progFase: "50%", progCap: "35%", mktStatus: "Ativo", mktVal: "R$ 8.000", progMkt: "25%" },
+                { nome: "Etapa 3: Curva S Acelerada (R$ 120k)", faseStr: "Etapa 3", comp: "R$ 150k / R$ 140k", desvio: "-7% (Leve atraso)", progFase: "75%", progCap: "70%", mktStatus: "Escala", mktVal: "R$ 33.000", progMkt: "55%" },
+                { nome: "Etapa 4+: Escala Total (R$ 350k+)", faseStr: "Etapa 4", comp: "R$ 500k / R$ 515k", desvio: "+3% (Superação)", progFase: "100%", progCap: "100%", mktStatus: "Consolidado", mktVal: "R$ 93.000", progMkt: "100%" }
             ];
 
             const e = etapasInfo[etapaAtual - 1];
